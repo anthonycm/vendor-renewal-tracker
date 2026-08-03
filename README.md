@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vendor & License Renewal Tracker
 
-## Getting Started
+A single-user tracker for vendor contracts, software licenses, hardware warranties,
+and gaming licenses at a tribal gaming property — built to replace a manual
+spreadsheet-and-memory process for staying ahead of renewal deadlines.
 
-First, run the development server:
+Live: https://vendor-renewal-tracker-seven.vercel.app
+
+## What it does
+
+- **Dashboard** (`/`) — every tracked item, sorted by risk (high first) then days
+  remaining, with tracked/high-risk/due-within-60-days counts.
+- **Add New Item** (`/items/new`) — intake form for a new renewal item.
+- **Item Detail** (`/items/[id]`) — full record, recommended action, renewal
+  history, Reassess button, status control.
+- **Status Report** (`/report`) — read-only snapshot for handoff/audit.
+
+## Scheduled vs. on-demand
+
+- **Scheduled**: a Vercel Cron job (`GET /api/cron/daily-scan`, daily at 13:00
+  UTC via `vercel.json`) scans every open item, and for anything within 60 days
+  that hasn't been flagged in the last 24 hours, calls the shared assessment
+  function and writes the verdict back.
+- **On-demand**: Add Item, Update Status, Generate Report, and the Reassess
+  button (`POST /api/items/[id]/reassess`) — all plain, deterministic reads
+  and writes with no Claude call, except Reassess, which triggers the same
+  assessment function as the cron job, immediately, for one item.
+
+## The agentic step
+
+Urgency here isn't just "how many days are left" — it's days left weighed
+against how bad the consequence is and whether this specific vendor has been
+flexible before. That's a judgment call, not a threshold, so
+`assessRenewalUrgency()` (`lib/claude.ts`) hands the item plus its renewal
+history to Claude (`claude-haiku-4-5-20251001`) and gets back a risk tier and
+a plain-language recommended action — fixed if/else logic can't weigh
+"severe consequence, no vendor flexibility" against "mild consequence, tight
+date" the way a person actually would.
+
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Requires a `.env.local` with `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+`ANTHROPIC_API_KEY`, and `CRON_SECRET` — see `.env.example`.
