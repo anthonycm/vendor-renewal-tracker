@@ -43,7 +43,14 @@ export async function assessRenewalUrgency(
     throw new Error('Unexpected response content type from Claude')
   }
 
-  const parsed = JSON.parse(block.text) as {
+  // Claude is asked to respond with bare JSON, but sometimes wraps it in
+  // markdown fences anyway — strip those defensively before parsing.
+  const jsonText = block.text
+    .trim()
+    .replace(/^```(?:json)?\s*/, '')
+    .replace(/\s*```$/, '')
+
+  const parsed = JSON.parse(jsonText) as {
     risk_tier: string
     recommended_action: string
   }
