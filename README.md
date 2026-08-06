@@ -1,7 +1,7 @@
 # Vendor & License Renewal Tracker
 
 A single-user tracker for vendor contracts, software licenses, hardware warranties,
-and gaming licenses at a tribal gaming property — built to replace a manual
+and gaming licenses at a tribal gaming property; built to replace a manual
 spreadsheet-and-memory process for staying ahead of renewal deadlines.
 
 Live: https://vendor-renewal-tracker-seven.vercel.app
