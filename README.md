@@ -28,7 +28,7 @@ Live: https://vendor-renewal-tracker-seven.vercel.app
 
 ## The agentic step
 
-Urgency here isn't just "how many days are left" — it's days left weighed
+Urgency here isn't just "how many days are left"; it's days left weighed
 against how bad the consequence is and whether this specific vendor has been
 flexible before. That's a judgment call, not a threshold, so
 `assessRenewalUrgency()` (`lib/claude.ts`) hands the item plus its renewal
