@@ -13,9 +13,17 @@ export type ItemStatus =
   | 'submitted_to_vendor'
   | 'renewed'
 
+export type ExtractionStatus = 'not_extracted' | 'pending_review' | 'reviewed'
+
 export interface RenewalHistoryEntry {
   date: string
   note: string
+}
+
+export interface ProposedValues {
+  expiration_date: string | null
+  renewal_terms: string | null
+  vendor_contact: string | null
 }
 
 export interface RenewalItem {
@@ -31,6 +39,9 @@ export interface RenewalItem {
   vendor_contact: string | null
   renewal_history: RenewalHistoryEntry[]
   last_flagged_at: string | null
+  source_document_url: string | null
+  extraction_status: ExtractionStatus
+  proposed_values: ProposedValues | null
   created_at: string
   updated_at: string
 }
