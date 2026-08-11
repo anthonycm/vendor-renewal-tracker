@@ -38,10 +38,11 @@ export interface RenewalItem {
   internal_owner: string | null
   vendor_contact: string | null
   renewal_history: RenewalHistoryEntry[]
+  renewal_terms: string | null
   last_flagged_at: string | null
   source_document_url: string | null
   extraction_status: ExtractionStatus
-  proposed_values: ProposedValues | null
+  proposed_values: Partial<ProposedValues> | null
   created_at: string
   updated_at: string
 }
@@ -60,3 +61,6 @@ export const ITEM_STATUSES: ItemStatus[] = [
   'submitted_to_vendor',
   'renewed',
 ]
+
+export const PROPOSABLE_FIELDS = ['expiration_date', 'renewal_terms', 'vendor_contact'] as const
+export type ProposableField = (typeof PROPOSABLE_FIELDS)[number]

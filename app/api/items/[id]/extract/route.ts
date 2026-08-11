@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { extractDocumentTerms } from '@/lib/claude'
-import type { RenewalItem } from '@/lib/types'
+import type { ProposedValues, RenewalItem } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 // PDF upload plus a Claude call takes longer than the existing routes.
@@ -65,14 +65,22 @@ export async function POST(
   }
 
   try {
-    const proposedValues = await extractDocumentTerms(fileBuffer.toString('base64'))
+    const extracted = await extractDocumentTerms(fileBuffer.toString('base64'))
+
+    // Only carry non-null fields into proposed_values. A field the document
+    // didn't state has nothing to review, so it should never sit there
+    // blocking extraction_status from reaching 'reviewed'.
+    const proposedValues = Object.fromEntries(
+      Object.entries(extracted).filter(([, value]) => value !== null)
+    ) as Partial<ProposedValues>
+    const hasProposal = Object.keys(proposedValues).length > 0
 
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('renewal_items')
       .update({
         source_document_url: storagePath,
-        extraction_status: 'pending_review',
-        proposed_values: proposedValues,
+        extraction_status: hasProposal ? 'pending_review' : 'reviewed',
+        proposed_values: hasProposal ? proposedValues : null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
